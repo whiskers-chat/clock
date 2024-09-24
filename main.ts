@@ -256,7 +256,8 @@ meower.socket.on("create_message", (post) => {
         if (typeof (command[2]) != "string") break;
         const searchValue = command[2];
         const options = {
-          includeScore: false
+          includeScore: false,
+          threshold: .4,
         }
         const fuse = new Fuse(masterTimeZoneList, options)
         const fuseResults = fuse.search(searchValue)
