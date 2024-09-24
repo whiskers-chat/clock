@@ -1,6 +1,7 @@
 import * as meow from "@meower/api-client";
 import { datetime } from "https://deno.land/x/ptera/mod.ts";
 import { timezone } from "./timezones.ts";
+import Fuse from 'npm:fuse.js'
 
 const meower = await meow.client.login({
   api_url: "https://api.meower.org",
@@ -109,8 +110,8 @@ async function updateQuote(api: meow.client, newQuote: String) {
   });
 }
 
-function createTimeZoneList(): String[] {
-  let timeZoneList: String[] = [];
+function createTimeZoneList(): string[] {
+  let timeZoneList: string[] = [];
   timezone.forEach((element) => {
     timeZoneList.push(element.id);
   });
@@ -254,8 +255,14 @@ meower.socket.on("create_message", (post) => {
       try {
         if (typeof (command[2]) != "string") break;
         const searchValue = command[2];
-        let results = masterTimeZoneList.filter((value) => {
-          return value.toLowerCase().includes(searchValue.toLowerCase());
+        const options = {
+          includeScore: false
+        }
+        const fuse = new Fuse(masterTimeZoneList, options)
+        const fuseResults = fuse.search(searchValue)
+        let results: string[] = [];
+        fuseResults.forEach(element => {
+          results.push(element.item)
         });
         if (results.length == 0) results.push("No timezones found");
         let replyContent: string = `Search Results for ${searchValue}:\n${

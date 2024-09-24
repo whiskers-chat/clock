@@ -2,13 +2,18 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "jsr:@abdurahman/fuzzy-search@^1.0.1": "jsr:@abdurahman/fuzzy-search@1.0.1",
       "jsr:@denosaurs/event@2.0.2": "jsr:@denosaurs/event@2.0.2",
       "jsr:@meower/api-client@^1.0.1": "jsr:@meower/api-client@1.0.1",
       "jsr:@std/assert@1": "jsr:@std/assert@1.0.5",
       "jsr:@std/datetime@^0.225.2": "jsr:@std/datetime@0.225.2",
-      "jsr:@std/internal@^1.0.3": "jsr:@std/internal@1.0.3"
+      "jsr:@std/internal@^1.0.3": "jsr:@std/internal@1.0.3",
+      "npm:fuse.js": "npm:fuse.js@7.0.0"
     },
     "jsr": {
+      "@abdurahman/fuzzy-search@1.0.1": {
+        "integrity": "ff5b9a19426f03a5c594fb771d4e1f6cef3bc2bb87c5633447f3dac939b1469a"
+      },
       "@denosaurs/event@2.0.2": {
         "integrity": "3310ba1a9e94dd60ccb09c6084fc818cc1cd50e543c56ef0c6199f1b89073392"
       },
@@ -29,6 +34,12 @@
       },
       "@std/internal@1.0.3": {
         "integrity": "208e9b94a3d5649bd880e9ca38b885ab7651ab5b5303a56ed25de4755fb7b11e"
+      }
+    },
+    "npm": {
+      "fuse.js@7.0.0": {
+        "integrity": "sha512-14F4hBIxqKvD4Zz/XjDc3y94mNZN6pRv3U13Udo0lNLCWRBUsrMv2xwcF/y/Z5sV6+FQW+/ow68cHpm4sunt8Q==",
+        "dependencies": {}
       }
     }
   },
@@ -64,6 +75,7 @@
     "https://deno.land/std@0.186.0/http/negotiation.ts": "46e74a6bad4b857333a58dc5b50fe8e5a4d5267e97292293ea65f980bd918086",
     "https://deno.land/std@0.186.0/http/server.ts": "1b23463b5b36e4eebc495417f6af47a6f7d52e3294827a1226d2a1aab23d9d20",
     "https://deno.land/std@0.186.0/http/server_sent_event.ts": "f752c9e4f0eba247a3fead8bfe0883f44e04d31c2dcc88776ba5230b7165a460",
+    "https://deno.land/x/fuse@v6.4.1/dist/fuse.js": "83b491d4898dfc846197aacd696a1afee8d5c3b5cc3c57fb9fe5985613917cd7",
     "https://deno.land/x/ptera@v1.0.2/constants.ts": "61659e7f70136d73e0215d373fa815427f424a8b1596bf88ba62da4f542b4c2a",
     "https://deno.land/x/ptera@v1.0.2/convert.ts": "f4251fd3f46b7924fc70f2e81c13eeee9123897478b309e3117cc8b421386c81",
     "https://deno.land/x/ptera@v1.0.2/datetime.ts": "fd6bd0e6bc8cb6ddd21416d7f9bde6fca93d0a6de17dfad676ce79af1cd667a3",
@@ -85,6 +97,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@abdurahman/fuzzy-search@^1.0.1",
       "jsr:@meower/api-client@^1.0.1",
       "jsr:@std/assert@1",
       "jsr:@std/datetime@^0.225.2"
