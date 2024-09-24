@@ -101,6 +101,12 @@ function convertTo12H(hour: number): number {
   }
 }
 
+function fixTime(value: number): string {
+  let result: string = value.toString();
+  if (result.length == 1) result = "0" + result;
+  return result;
+}
+
 async function updateQuote(api: meow.client, newQuote: String) {
   const endPoint = `${meower.api.api_url}/me/config`;
   const response = await fetch(endPoint, {
@@ -230,7 +236,7 @@ meower.socket.on("create_message", (post) => {
         if (format == 12) {
           if (masterTimeZoneList.includes(timeZone)) {
             replyContent =
-              `@${post.username} ${convertTo12H(zonedTime.hour)}:${zonedTime.minute} ${daySection} (${timeZone})!`;
+              `@${post.username} ${fixTime(convertTo12H(zonedTime.hour))}:${fixTime(zonedTime.minute)} ${daySection} (${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the time atm. \nERROR 35: Invalid Time Zone!`;
@@ -238,7 +244,7 @@ meower.socket.on("create_message", (post) => {
         } else if (format == 24) {
           if (masterTimeZoneList.includes(timeZone)) {
             replyContent =
-              `@${post.username} ${zonedTime.hour}:${zonedTime.minute} (${timeZone})!`;
+              `@${post.username} ${fixTime(zonedTime.hour)}:${fixTime(zonedTime.minute)} (${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the time atm. \nERROR 35: Invalid Time Zone!`;
@@ -298,7 +304,7 @@ meower.socket.on("create_message", (post) => {
       try {
         let replyContent: string;
         let format = 12;
-        let timeZone = "Etc/GMT";
+        let timeZone = "Etc/UTC";
         if (typeof(command[2]) == 'string') timeZone = command[2];
         if (typeof(command[3]) == 'string') format = Number(command[3]);
         const zonedTime = datetime().toZonedTime(timeZone);
@@ -307,7 +313,7 @@ meower.socket.on("create_message", (post) => {
         if (format == 12) {
           if (masterTimeZoneList.includes(timeZone)) {
             replyContent =
-              `@${post.username} ${convertTo12H(zonedTime.hour)}:${zonedTime.minute} ${daySection} ${zonedTime.month}/${zonedTime.day}/${zonedTime.year} (${timeZone})!`;
+              `@${post.username} ${fixTime(convertTo12H(zonedTime.hour))}:${fixTime(zonedTime.minute)} ${daySection} ${zonedTime.month}/${zonedTime.day}/${zonedTime.year} (${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the date atm. \nERROR 35: Invalid Time Zone!`;
@@ -315,7 +321,7 @@ meower.socket.on("create_message", (post) => {
         } else if (format == 24) {
           if (masterTimeZoneList.includes(timeZone)) {
             replyContent =
-              `@${post.username} ${zonedTime.hour}:${zonedTime.minute} ${zonedTime.month}/${zonedTime.day}/${zonedTime.year} (${timeZone})!`;
+              `@${post.username} ${fixTime(zonedTime.hour)}:${fixTime(zonedTime.minute)} ${zonedTime.month}/${zonedTime.day}/${zonedTime.year} (${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the date atm. \nERROR 35: Invalid Time Zone!`;
