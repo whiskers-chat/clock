@@ -14,45 +14,47 @@ type helpEntry = {
   command: string[];
   args: string;
   desc: string;
-}
+  examples: string[];
+};
 
 let helpSections: helpEntry[] = [];
-const errorMsg = "Oh no, something went wrong. Contact support@whiskers.chat with this message and a time stamp so we can look into it."
+
+const errorMsg =
+  "Oh no, something went wrong. Contact support@whiskers.chat with this message and a time stamp so we can look into it.";
 helpSections.push({
   command: ["ping"],
   args: "",
   desc: "Check if the bot is online",
-})
+  examples: ["@clock ping"]
+});
 
 helpSections.push({
   command: ["help"],
   args: "?Page: Number",
   desc: "Get help with the bot",
-})
+  examples: ["@clock help 2"]
+});
 
 helpSections.push({
   command: ["search"],
   args: "query: string",
   desc: "Searches for timezones from the db",
-})
-
-helpSections.push({
-  command: ["search"],
-  args: "query: string",
-  desc: "Searches for timezones from the db",
-})
+  examples: ["@clock search new", "@clock search ETC"]
+});
 
 helpSections.push({
   command: ["getTime", "time"],
-  args: "?TimeZone: String",
-  desc: "Get the time in a timezone, default timezone is GMT.",
-})
+  args: "?TimeZone: String, ?format: Number",
+  desc: "Get the time in a timezone in 24H or 12H format, default timezone is GMT.",
+  examples: ["@clock time America/Juneau 24","@clock time America/New_York","@clock time"]
+});
 
 helpSections.push({
-  command: ["getTime24", "time24"],
-  args: "?TimeZone: String",
-  desc: "Get the time in a timezone in 24H format, default timezone is GMT.",
-})
+  command: ["getDate", "date"],
+  args: "?TimeZone: String, ?format: Number",
+  desc: "Get the date in a timezone in 24H or 12H format, default timezone is GMT.",
+  examples: ["@clock date Etc/GMT+1 24","@clock date America/New_York","@clock date"]
+});
 
 function createHelpPageTables(helpSections: helpEntry[]): string[] {
   const header = "| Command | Args | Desc |";
@@ -61,13 +63,14 @@ function createHelpPageTables(helpSections: helpEntry[]): string[] {
   let index = 0;
   let page = 0;
   let results: string[] = [];
-  helpSections.forEach(helpSection => {
+  helpSections.forEach((helpSection) => {
     if (index % 5 == 0) {
       page++;
       results[page - 1] = base;
     }
 
-    results[page - 1] += `| ${helpSection.command} | ${helpSection.args} | ${helpSection.desc} |\n`
+    results[page - 1] +=
+      `| ${helpSection.command} | ${helpSection.args} | ${helpSection.desc} |\n`;
     index++;
   });
 
@@ -141,10 +144,12 @@ meower.socket.on("create_message", (post) => {
     case "help": {
       try {
         let page = 1;
-        if (typeof (command[2]) != 'undefined') page = command[2];
+        if (typeof (command[2]) != "undefined") page = command[2];
         post.reply({
           content: `
-          **Help Page ${Number(page)}/${helpPageTable.length}:** ${helpPageTable[page - 1]}`,
+          **Help Page ${Number(page)}/${helpPageTable.length}:** ${
+            helpPageTable[page - 1]
+          }`,
         });
       } catch (err) {
         post.reply({
@@ -188,8 +193,9 @@ meower.socket.on("create_message", (post) => {
           "Etc/UTC",
         ];
         post.reply({
-          content: `@${post.username} The time zones you can use are: \n${timeZoneList.join(", ")
-            } \nThis is not a full list as the full version is too long to send.`,
+          content: `@${post.username} The time zones you can use are: \n${
+            timeZoneList.join(", ")
+          } \nThis is not a full list as the full version is too long to send.`,
         });
       } catch (err) {
         post.reply({
@@ -203,51 +209,32 @@ meower.socket.on("create_message", (post) => {
     case "time":
     case "gettime": {
       try {
-        let zonedTime = datetime().toZonedTime("ETC/GMT");
-        let daySection = getDaySection(zonedTime.hour);
-        let replyContent: string = `@${post.username} ${convertTo12H(zonedTime.hour)
-          }:${zonedTime.minute} ${daySection} (ETC/GMT)!`;
-        if (command?.length == 3) {
-          const timeZone = command[2];
+        let replyContent: string;
+        let format = 12;
+        let timeZone = "ETC/GMT";
+        if (typeof(command[2]) == 'string') timeZone = command[2];
+        if (typeof(command[3]) == 'string') format = Number(command[3]);
+        const zonedTime = datetime().toZonedTime(timeZone);
+        const daySection = getDaySection(zonedTime.hour);
+
+        if (format == 12) {
           if (masterTimeZoneList.includes(timeZone)) {
-            zonedTime = datetime().toZonedTime(timeZone);
-            daySection = getDaySection(zonedTime.hour);
-            replyContent = `@${post.username} ${convertTo12H(zonedTime.hour)
-              }:${zonedTime.minute} ${daySection} (${timeZone})!`;
+            replyContent =
+              `@${post.username} ${convertTo12H(zonedTime.hour)}:${zonedTime.minute} ${daySection} ${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the time atm. \nERROR 35: Invalid Time Zone!`;
           }
-        }
-        post.reply({
-          reply_to: [post.id],
-          content: replyContent,
-        });
-      } catch (err) {
-        post.reply({
-          reply_to: [post.id],
-          content: errorMsg,
-        });
-      } finally {
-        break;
-      }
-    }
-    case "time24":
-    case "gettime24": {
-      try {
-        let zonedTime = datetime().toZonedTime("ETC/GMT");
-        let replyContent: string =
-          `@${post.username} ${zonedTime.hour}:${zonedTime.minute} (ETC/GMT)!`;
-        if (command?.length == 3) {
-          const timeZone = command[2];
+        } else if (format == 24) {
           if (masterTimeZoneList.includes(timeZone)) {
-            zonedTime = datetime().toZonedTime(timeZone);
             replyContent =
               `@${post.username} ${zonedTime.hour}:${zonedTime.minute} (${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the time atm. \nERROR 35: Invalid Time Zone!`;
           }
+        } else {
+          replyContent = `@${post.username} I don't feel like telling you the time atm. \nERROR 36: Invalid format!`;
         }
 
         post.reply({
@@ -265,13 +252,59 @@ meower.socket.on("create_message", (post) => {
     }
     case "search": {
       try {
-        if (typeof (command[2]) != 'string') break;
+        if (typeof (command[2]) != "string") break;
         const searchValue = command[2];
         let results = masterTimeZoneList.filter((value) => {
           return value.toLowerCase().includes(searchValue.toLowerCase());
         });
-        if (results.length == 0) results.push("No timezones found")
-        let replyContent: string = `Search Results for ${searchValue}:\n${results.splice(0, 20).join(", ")} \nMax number of results is 20.`;
+        if (results.length == 0) results.push("No timezones found");
+        let replyContent: string = `Search Results for ${searchValue}:\n${
+          results.splice(0, 40).join(", ")
+        } \nMax number of results is 30.`;
+        post.reply({
+          reply_to: [post.id],
+          content: replyContent,
+        });
+      } catch (err) {
+        post.reply({
+          reply_to: [post.id],
+          content: errorMsg,
+        });
+      } finally {
+        break;
+      }
+    }
+    case "date":
+    case "getdate": {
+      try {
+        let replyContent: string;
+        let format = 12;
+        let timeZone = "ETC/GMT";
+        if (typeof(command[2]) == 'string') timeZone = command[2];
+        if (typeof(command[3]) == 'string') format = Number(command[3]);
+        const zonedTime = datetime().toZonedTime(timeZone);
+        const daySection = getDaySection(zonedTime.hour);
+
+        if (format == 12) {
+          if (masterTimeZoneList.includes(timeZone)) {
+            replyContent =
+              `@${post.username} ${convertTo12H(zonedTime.hour)}:${zonedTime.minute} ${daySection} ${zonedTime.month}/${zonedTime.day}/${zonedTime.year} (${timeZone})!`;
+          } else {
+            replyContent =
+              `@${post.username} I don't feel like telling you the date atm. \nERROR 35: Invalid Time Zone!`;
+          }
+        } else if (format == 24) {
+          if (masterTimeZoneList.includes(timeZone)) {
+            replyContent =
+              `@${post.username} ${zonedTime.hour}:${zonedTime.minute} ${zonedTime.month}/${zonedTime.day}/${zonedTime.year} (${timeZone})!`;
+          } else {
+            replyContent =
+              `@${post.username} I don't feel like telling you the date atm. \nERROR 35: Invalid Time Zone!`;
+          }
+        } else {
+          replyContent = `@${post.username} I don't feel like telling you the date atm. \nERROR 36: Invalid format!`;
+        }
+
         post.reply({
           reply_to: [post.id],
           content: replyContent,
