@@ -220,7 +220,7 @@ meower.socket.on("create_message", (post) => {
       try {
         let replyContent: string;
         let format = 12;
-        let timeZone = "ETC/GMT";
+        let timeZone = "Etc/GMT";
         if (typeof(command[2]) == 'string') timeZone = command[2];
         if (typeof(command[3]) == 'string') format = Number(command[3]);
         const zonedTime = datetime().toZonedTime(timeZone);
@@ -297,7 +297,7 @@ meower.socket.on("create_message", (post) => {
       try {
         let replyContent: string;
         let format = 12;
-        let timeZone = "ETC/GMT";
+        let timeZone = "Etc/GMT";
         if (typeof(command[2]) == 'string') timeZone = command[2];
         if (typeof(command[3]) == 'string') format = Number(command[3]);
         const zonedTime = datetime().toZonedTime(timeZone);
