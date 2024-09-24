@@ -6,5 +6,4 @@ COPY . ./
 
 RUN deno cache main.ts
 
-CMD ["run", "--allow-net", "main.ts"]
-# fix
+CMD ["run", "--allow-net", "--allow-env", "main.ts"]

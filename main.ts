@@ -6,8 +6,8 @@ const meower = await meow.client.login({
   api_url: "https://api.meower.org",
   socket_url: "wss://server.meower.org",
   uploads_url: "https://uploads.meower.org",
-  username: Deno.args[0],
-  password: Deno.args[1],
+  username: Deno.env.get("user"),
+  password: Deno.env.get("password"),
 });
 
 type helpEntry = {
