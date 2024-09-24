@@ -129,6 +129,7 @@ updateQuote(
   meower,
   "Bot is online!\nRun ```@clock help``` to see what I can do!\nrun by @Blahaj, if you have any issues, contact support@whiskers.chat",
 );
+
 meower.socket.on("create_message", (post) => {
   const command = post.content.split(" ");
   if (command[0].toLowerCase() != `@${botUser}`) return;
@@ -220,7 +221,7 @@ meower.socket.on("create_message", (post) => {
       try {
         let replyContent: string;
         let format = 12;
-        let timeZone = "Etc/GMT";
+        let timeZone = "Etc/UTC";
         if (typeof(command[2]) == 'string') timeZone = command[2];
         if (typeof(command[3]) == 'string') format = Number(command[3]);
         const zonedTime = datetime().toZonedTime(timeZone);
@@ -229,7 +230,7 @@ meower.socket.on("create_message", (post) => {
         if (format == 12) {
           if (masterTimeZoneList.includes(timeZone)) {
             replyContent =
-              `@${post.username} ${convertTo12H(zonedTime.hour)}:${zonedTime.minute} ${daySection} ${timeZone})!`;
+              `@${post.username} ${convertTo12H(zonedTime.hour)}:${zonedTime.minute} ${daySection} (${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the time atm. \nERROR 35: Invalid Time Zone!`;
