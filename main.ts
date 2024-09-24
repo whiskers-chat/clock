@@ -11,6 +11,8 @@ const meower = await meow.client.login({
   password: Deno.env.get("password"),
 });
 
+const botUser = Deno.env.get("user");
+
 type helpEntry = {
   command: string[];
   args: string;
@@ -57,6 +59,9 @@ helpSections.push({
   examples: ["@clock date Etc/GMT+1 24","@clock date America/New_York","@clock date"]
 });
 
+function logCommand(command: String[], user: string) {
+  console.log(`COMMAND: @${user} ran ${command}`);
+}
 function createHelpPageTables(helpSections: helpEntry[]): string[] {
   const header = "| Command | Args | Desc |";
   const divider = "| ------ | ------- | ------- |";
@@ -126,13 +131,14 @@ updateQuote(
 );
 meower.socket.on("create_message", (post) => {
   const command = post.content.split(" ");
-  if (command[0].toLowerCase() != "@clock") return;
+  if (command[0].toLowerCase() != `@${botUser}`) return;
   switch (command[1].toLowerCase()) {
     case "ping": {
       try {
         post.reply({
           content: `@${post.username} Pong!`,
         });
+        logCommand(command, post.username);
       } catch (err) {
         post.reply({
           reply_to: [post.id],
@@ -152,6 +158,7 @@ meower.socket.on("create_message", (post) => {
             helpPageTable[page - 1]
           }`,
         });
+        logCommand(command, post.username);
       } catch (err) {
         post.reply({
           reply_to: [post.id],
@@ -198,6 +205,7 @@ meower.socket.on("create_message", (post) => {
             timeZoneList.join(", ")
           } \nThis is not a full list as the full version is too long to send.`,
         });
+        logCommand(command, post.username);
       } catch (err) {
         post.reply({
           reply_to: [post.id],
@@ -242,6 +250,7 @@ meower.socket.on("create_message", (post) => {
           reply_to: [post.id],
           content: replyContent,
         });
+        logCommand(command, post.username);
       } catch (err) {
         post.reply({
           reply_to: [post.id],
@@ -273,6 +282,7 @@ meower.socket.on("create_message", (post) => {
           reply_to: [post.id],
           content: replyContent,
         });
+        logCommand(command, post.username);
       } catch (err) {
         post.reply({
           reply_to: [post.id],
@@ -317,6 +327,7 @@ meower.socket.on("create_message", (post) => {
           reply_to: [post.id],
           content: replyContent,
         });
+        logCommand(command, post.username);
       } catch (err) {
         post.reply({
           reply_to: [post.id],
@@ -331,6 +342,7 @@ meower.socket.on("create_message", (post) => {
         reply_to: [post.id],
         content: "Unknown Command",
       });
+      logCommand(command, post.username);
       break;
   }
 });
