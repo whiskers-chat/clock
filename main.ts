@@ -344,6 +344,44 @@ meower.socket.on("create_message", (post) => {
         break;
       }
     }
+    case "example": {
+        try {
+          if (typeof(command[1]) != 'string') {
+            post.reply({
+              reply_to: [post.id],
+              content: "Enter a command to get examples for",
+            });
+            break;
+          };
+          const exCommand = command[1];
+          let examples: string[] = [];
+          helpSections.forEach(element => {
+            if (element.command[1].toLowerCase() == exCommand.toLowerCase()) {
+              examples = element.examples;
+            }
+          });
+          if (examples.length == 0) {
+            post.reply({
+              reply_to: [post.id],
+              content: "Command Not Found",
+            });
+            break;
+          }
+          let replyContent = `Examples for: ${exCommand}\n${examples.join(", ")}`
+          post.reply({
+            reply_to: [post.id],
+            content: replyContent,
+          });
+        } catch (error) {
+          console.log(error);
+          post.reply({
+            reply_to: [post.id],
+            content: errorMsg,
+          });
+        } finally {
+          break;
+        }
+    }
     default:
       post.reply({
         reply_to: [post.id],
