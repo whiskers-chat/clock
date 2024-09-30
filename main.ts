@@ -29,6 +29,7 @@ const meower = await meow.client.login({
 // Create code to send a heartbeat to betterstack.
 setInterval(() => {
   fetch(hburl);
+  console.log("HeartBeat sent to " + hburl);
 }, 60000);
 
 const botUser = Deno.env.get("user");
@@ -435,7 +436,7 @@ Deno.addSignalListener("SIGINT", async () => {
   console.log("Exit");
   await updateQuote(
     meower,
-    "Bot is offline. \nrun by @Blahaj, if you have any issues, contact support@whiskers.chat",
+    "Bot is offline. Visit https://status.whiskers.chat/ for more info.\nrun by @Blahaj, if you have any issues, contact support@whiskers.chat",
   );
   Deno.exit();
 });
