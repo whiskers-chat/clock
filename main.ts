@@ -2,14 +2,20 @@ import * as meow from "@meower/api-client";
 import { datetime } from "https://deno.land/x/ptera/mod.ts";
 import { timezone } from "./timezones.ts";
 import Fuse from "npm:fuse.js";
+
+
 let user: string = "";
 let password: string = "";
+let hburl: string = "https://www.example.com";
 
 if (Deno.env.get("user") !== undefined) {
   user = Deno.env.get("user")!;
 }
 if (Deno.env.get("password") !== undefined) {
   password = Deno.env.get("password")!;
+}
+if (Deno.env.get("hburl") !== undefined) {
+  hburl = Deno.env.get("hburl")!;
 }
 
 const meower = await meow.client.login({
@@ -19,6 +25,11 @@ const meower = await meow.client.login({
   username: user,
   password: password,
 });
+
+// Create code to send a heartbeat to betterstack.
+setInterval(() => {
+  fetch(hburl);
+}, 60000);
 
 const botUser = Deno.env.get("user");
 
