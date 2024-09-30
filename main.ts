@@ -1,14 +1,23 @@
 import * as meow from "@meower/api-client";
 import { datetime } from "https://deno.land/x/ptera/mod.ts";
 import { timezone } from "./timezones.ts";
-import Fuse from 'npm:fuse.js'
+import Fuse from "npm:fuse.js";
+let user: string = "";
+let password: string = "";
+
+if (Deno.env.get("user") !== undefined) {
+  user = Deno.env.get("user")!;
+}
+if (Deno.env.get("password") !== undefined) {
+  password = Deno.env.get("password")!;
+}
 
 const meower = await meow.client.login({
   api_url: "https://api.meower.org",
   socket_url: "wss://server.meower.org",
   uploads_url: "https://uploads.meower.org",
-  username: Deno.env.get("user"),
-  password: Deno.env.get("password"),
+  username: user,
+  password: password,
 });
 
 const botUser = Deno.env.get("user");
@@ -28,38 +37,48 @@ helpSections.push({
   command: ["ping"],
   args: "",
   desc: "Check if the bot is online",
-  examples: ["@clock ping"]
+  examples: ["@clock ping"],
 });
 
 helpSections.push({
   command: ["help"],
   args: "?Page: Number",
   desc: "Get help with the bot",
-  examples: ["@clock help 2"]
+  examples: ["@clock help 2"],
 });
 
 helpSections.push({
   command: ["search"],
   args: "query: string",
   desc: "Searches for timezones from the db",
-  examples: ["@clock search new", "@clock search ETC"]
+  examples: ["@clock search new", "@clock search ETC"],
 });
 
 helpSections.push({
   command: ["getTime", "time"],
   args: "?TimeZone: String, ?format: Number",
-  desc: "Get the time in a timezone in 24H or 12H format, default timezone is GMT.",
-  examples: ["@clock time America/Juneau 24","@clock time America/New_York","@clock time"]
+  desc:
+    "Get the time in a timezone in 24H or 12H format, default timezone is GMT.",
+  examples: [
+    "@clock time America/Juneau 24",
+    "@clock time America/New_York",
+    "@clock time",
+  ],
 });
 
 helpSections.push({
   command: ["getDate", "date"],
   args: "?TimeZone: String, ?format: Number",
-  desc: "Get the date in a timezone in 24H or 12H format, default timezone is GMT.",
-  examples: ["@clock date Etc/GMT+1 24","@clock date America/New_York","@clock date"]
+  desc:
+    "Get the date in a timezone in 24H or 12H format, default timezone is GMT.",
+  examples: [
+    "@clock date Etc/GMT+1 24",
+    "@clock date America/New_York",
+    "@clock date",
+  ],
 });
 
-function logCommand(command: String[], user: string) {
+function logCommand(command: string[], user: string) {
   console.log(`COMMAND: @${user} ran ${command}`);
 }
 function createHelpPageTables(helpSections: helpEntry[]): string[] {
@@ -107,7 +126,7 @@ function fixTime(value: number): string {
   return result;
 }
 
-async function updateQuote(api: meow.client, newQuote: String) {
+async function updateQuote(api: meow.client, newQuote: string) {
   const endPoint = `${meower.api.api_url}/me/config`;
   const response = await fetch(endPoint, {
     method: "PATCH",
@@ -158,7 +177,7 @@ meower.socket.on("create_message", (post) => {
     case "help": {
       try {
         let page = 1;
-        if (typeof (command[2]) != "undefined") page = command[2];
+        if (typeof (command[2]) != "undefined") { page = Number(command[2]) };
         post.reply({
           content: `
           **Help Page ${Number(page)}/${helpPageTable.length}:** ${
@@ -228,29 +247,32 @@ meower.socket.on("create_message", (post) => {
         let replyContent: string;
         let format = 12;
         let timeZone = "Etc/UTC";
-        if (typeof(command[2]) == 'string') timeZone = command[2];
-        if (typeof(command[3]) == 'string') format = Number(command[3]);
+        if (typeof (command[2]) == "string") timeZone = command[2];
+        if (typeof (command[3]) == "string") format = Number(command[3]);
         const zonedTime = datetime().toZonedTime(timeZone);
         const daySection = getDaySection(zonedTime.hour);
 
         if (format == 12) {
           if (masterTimeZoneList.includes(timeZone)) {
-            replyContent =
-              `@${post.username} ${fixTime(convertTo12H(zonedTime.hour))}:${fixTime(zonedTime.minute)} ${daySection} (${timeZone})!`;
+            replyContent = `@${post.username} ${
+              fixTime(convertTo12H(zonedTime.hour))
+            }:${fixTime(zonedTime.minute)} ${daySection} (${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the time atm. \nERROR 35: Invalid Time Zone!`;
           }
         } else if (format == 24) {
           if (masterTimeZoneList.includes(timeZone)) {
-            replyContent =
-              `@${post.username} ${fixTime(zonedTime.hour)}:${fixTime(zonedTime.minute)} (${timeZone})!`;
+            replyContent = `@${post.username} ${fixTime(zonedTime.hour)}:${
+              fixTime(zonedTime.minute)
+            } (${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the time atm. \nERROR 35: Invalid Time Zone!`;
           }
         } else {
-          replyContent = `@${post.username} I don't feel like telling you the time atm. \nERROR 36: Invalid format!`;
+          replyContent =
+            `@${post.username} I don't feel like telling you the time atm. \nERROR 36: Invalid format!`;
         }
 
         post.reply({
@@ -274,12 +296,12 @@ meower.socket.on("create_message", (post) => {
         const options = {
           includeScore: false,
           threshold: .4,
-        }
-        const fuse = new Fuse(masterTimeZoneList, options)
-        const fuseResults = fuse.search(searchValue)
+        };
+        const fuse = new Fuse(masterTimeZoneList, options);
+        const fuseResults = fuse.search(searchValue);
         let results: string[] = [];
-        fuseResults.forEach(element => {
-          results.push(element.item)
+        fuseResults.forEach((element) => {
+          results.push(element.item);
         });
         if (results.length == 0) results.push("No timezones found");
         let replyContent: string = `Search Results for ${searchValue}:\n${
@@ -305,29 +327,34 @@ meower.socket.on("create_message", (post) => {
         let replyContent: string;
         let format = 12;
         let timeZone = "Etc/UTC";
-        if (typeof(command[2]) == 'string') timeZone = command[2];
-        if (typeof(command[3]) == 'string') format = Number(command[3]);
+        if (typeof (command[2]) == "string") timeZone = command[2];
+        if (typeof (command[3]) == "string") format = Number(command[3]);
         const zonedTime = datetime().toZonedTime(timeZone);
         const daySection = getDaySection(zonedTime.hour);
 
         if (format == 12) {
           if (masterTimeZoneList.includes(timeZone)) {
-            replyContent =
-              `@${post.username} ${fixTime(convertTo12H(zonedTime.hour))}:${fixTime(zonedTime.minute)} ${daySection} ${zonedTime.month}/${zonedTime.day}/${zonedTime.year} (${timeZone})!`;
+            replyContent = `@${post.username} ${
+              fixTime(convertTo12H(zonedTime.hour))
+            }:${
+              fixTime(zonedTime.minute)
+            } ${daySection} ${zonedTime.month}/${zonedTime.day}/${zonedTime.year} (${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the date atm. \nERROR 35: Invalid Time Zone!`;
           }
         } else if (format == 24) {
           if (masterTimeZoneList.includes(timeZone)) {
-            replyContent =
-              `@${post.username} ${fixTime(zonedTime.hour)}:${fixTime(zonedTime.minute)} ${zonedTime.month}/${zonedTime.day}/${zonedTime.year} (${timeZone})!`;
+            replyContent = `@${post.username} ${fixTime(zonedTime.hour)}:${
+              fixTime(zonedTime.minute)
+            } ${zonedTime.month}/${zonedTime.day}/${zonedTime.year} (${timeZone})!`;
           } else {
             replyContent =
               `@${post.username} I don't feel like telling you the date atm. \nERROR 35: Invalid Time Zone!`;
           }
         } else {
-          replyContent = `@${post.username} I don't feel like telling you the date atm. \nERROR 36: Invalid format!`;
+          replyContent =
+            `@${post.username} I don't feel like telling you the date atm. \nERROR 36: Invalid format!`;
         }
 
         post.reply({
@@ -345,42 +372,42 @@ meower.socket.on("create_message", (post) => {
       }
     }
     case "example": {
-        try {
-          if (typeof(command[1]) != 'string') {
-            post.reply({
-              reply_to: [post.id],
-              content: "Enter a command to get examples for",
-            });
-            break;
-          };
-          const exCommand = command[1];
-          let examples: string[] = [];
-          helpSections.forEach(element => {
-            if (element.command[1].toLowerCase() == exCommand.toLowerCase()) {
-              examples = element.examples;
-            }
-          });
-          if (examples.length == 0) {
-            post.reply({
-              reply_to: [post.id],
-              content: "Command Not Found",
-            });
-            break;
-          }
-          let replyContent = `Examples for: ${exCommand}\n${examples.join(", ")}`
+      try {
+        if (typeof (command[1]) != "string") {
           post.reply({
             reply_to: [post.id],
-            content: replyContent,
+            content: "Enter a command to get examples for",
           });
-        } catch (error) {
-          console.log(error);
-          post.reply({
-            reply_to: [post.id],
-            content: errorMsg,
-          });
-        } finally {
           break;
         }
+        const exCommand = command[1];
+        let examples: string[] = [];
+        helpSections.forEach((element) => {
+          if (element.command[1].toLowerCase() == exCommand.toLowerCase()) {
+            examples = element.examples;
+          }
+        });
+        if (examples.length == 0) {
+          post.reply({
+            reply_to: [post.id],
+            content: "Command Not Found",
+          });
+          break;
+        }
+        let replyContent = `Examples for: ${exCommand}\n${examples.join(", ")}`;
+        post.reply({
+          reply_to: [post.id],
+          content: replyContent,
+        });
+      } catch (error) {
+        console.log(error);
+        post.reply({
+          reply_to: [post.id],
+          content: errorMsg,
+        });
+      } finally {
+        break;
+      }
     }
     default:
       post.reply({
