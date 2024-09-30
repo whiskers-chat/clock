@@ -424,7 +424,7 @@ Deno.addSignalListener("SIGINT", async () => {
   console.log("Exit");
   await updateQuote(
     meower,
-    "Bot is offline, Due to severe weather.\nrun by @Blahaj, if you have any issues, contact support@whiskers.chat",
+    "Bot is offline. \nrun by @Blahaj, if you have any issues, contact support@whiskers.chat",
   );
   Deno.exit();
 });
