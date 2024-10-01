@@ -93,6 +93,7 @@ helpSections.push({
 function logCommand(command: string[], user: string) {
   console.log(`COMMAND: @${user} ran ${command}`);
 }
+
 function createHelpPageTables(helpSections: helpEntry[]): string[] {
   const header = "| Command | Args | Desc |";
   const divider = "| ------ | ------- | ------- |";
