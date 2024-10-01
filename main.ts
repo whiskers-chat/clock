@@ -206,53 +206,6 @@ meower.socket.on("create_message", (post) => {
         break;
       }
     }
-    case "listtimezones": {
-      try {
-        const timeZoneList = [
-          "Etc/GMT",
-          "Etc/GMT+1",
-          "Etc/GMT+10",
-          "Etc/GMT+11",
-          "Etc/GMT+12",
-          "Etc/GMT+2",
-          "Etc/GMT+3",
-          "Etc/GMT+4",
-          "Etc/GMT+5",
-          "Etc/GMT+6",
-          "Etc/GMT+7",
-          "Etc/GMT+8",
-          "Etc/GMT+9",
-          "Etc/GMT-1",
-          "Etc/GMT-10",
-          "Etc/GMT-11",
-          "Etc/GMT-12",
-          "Etc/GMT-13",
-          "Etc/GMT-14",
-          "Etc/GMT-2",
-          "Etc/GMT-3",
-          "Etc/GMT-4",
-          "Etc/GMT-5",
-          "Etc/GMT-6",
-          "Etc/GMT-7",
-          "Etc/GMT-8",
-          "Etc/GMT-9",
-          "Etc/UTC",
-        ];
-        post.reply({
-          content: `@${post.username} The time zones you can use are: \n${
-            timeZoneList.join(", ")
-          } \nThis is not a full list as the full version is too long to send.`,
-        });
-        logCommand(command, post.username);
-      } catch (err) {
-        post.reply({
-          reply_to: [post.id],
-          content: errorMsg,
-        });
-      } finally {
-        break;
-      }
-    }
     case "time":
     case "gettime": {
       try {
