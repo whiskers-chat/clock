@@ -3,7 +3,6 @@ import { datetime } from "https://deno.land/x/ptera/mod.ts";
 import { timezone } from "./timezones.ts";
 import Fuse from "npm:fuse.js";
 
-
 let user: string = "";
 let password: string = "";
 let hburl: string = "https://www.example.com";
@@ -28,11 +27,14 @@ const meower = await meow.client.login({
 
 // Create code to send a heartbeat to betterstack.
 setInterval(() => {
-  fetch(hburl);
-  console.log("HeartBeat sent to " + hburl);
+  try {
+    fetch(hburl);
+    console.log("HeartBeat sent to " + hburl);
+  } catch (error) {
+    console.log("Heartbeat failed");
+    console.error(error);
+  }
 }, 60000);
-
-const botUser = Deno.env.get("user");
 
 type helpEntry = {
   command: string[];
@@ -41,7 +43,7 @@ type helpEntry = {
   examples: string[];
 };
 
-let helpSections: helpEntry[] = [];
+const helpSections: helpEntry[] = [];
 
 const errorMsg =
   "Oh no, something went wrong. Contact support@whiskers.chat with this message and a time stamp so we can look into it.";
@@ -100,7 +102,7 @@ function createHelpPageTables(helpSections: helpEntry[]): string[] {
   const base = "\n" + header + "\n" + divider + "\n";
   let index = 0;
   let page = 0;
-  let results: string[] = [];
+  const results: string[] = [];
   helpSections.forEach((helpSection) => {
     if (index % 5 == 0) {
       page++;
@@ -141,7 +143,7 @@ function fixTime(value: number): string {
 
 async function updateQuote(api: meow.client, newQuote: string) {
   const endPoint = `${meower.api.api_url}/me/config`;
-  const response = await fetch(endPoint, {
+  await fetch(endPoint, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -154,7 +156,7 @@ async function updateQuote(api: meow.client, newQuote: string) {
 }
 
 function createTimeZoneList(): string[] {
-  let timeZoneList: string[] = [];
+  const timeZoneList: string[] = [];
   timezone.forEach((element) => {
     timeZoneList.push(element.id);
   });
@@ -170,7 +172,7 @@ updateQuote(
 
 meower.socket.on("create_message", (post) => {
   const command = post.content.split(" ");
-  if (command[0].toLowerCase() != `@${botUser}`) return;
+  if (command[0].toLowerCase() != `@${user}`) return;
   switch (command[1].toLowerCase()) {
     case "ping": {
       try {
@@ -178,19 +180,20 @@ meower.socket.on("create_message", (post) => {
           content: `@${post.username} Pong!`,
         });
         logCommand(command, post.username);
-      } catch (err) {
+      } catch (error) {
+        console.log("Error: Create_Message");
+        console.error(error);
         post.reply({
           reply_to: [post.id],
           content: errorMsg,
         });
-      } finally {
-        break;
       }
+      break;
     }
     case "help": {
       try {
         let page = 1;
-        if (typeof (command[2]) != "undefined") { page = Number(command[2]) };
+        if (typeof (command[2]) != "undefined") page = Number(command[2]);
         post.reply({
           content: `
           **Help Page ${Number(page)}/${helpPageTable.length}:** ${
@@ -198,14 +201,15 @@ meower.socket.on("create_message", (post) => {
           }`,
         });
         logCommand(command, post.username);
-      } catch (err) {
+      } catch (error) {
+        console.log("Error: help");
+        console.error(error);
         post.reply({
           reply_to: [post.id],
           content: errorMsg,
         });
-      } finally {
-        break;
       }
+      break;
     }
     case "time":
     case "gettime": {
@@ -246,14 +250,15 @@ meower.socket.on("create_message", (post) => {
           content: replyContent,
         });
         logCommand(command, post.username);
-      } catch (err) {
+      } catch (error) {
+        console.log("Error: getTime");
+        console.error(error);
         post.reply({
           reply_to: [post.id],
           content: errorMsg,
         });
-      } finally {
-        break;
       }
+      break;
     }
     case "search": {
       try {
@@ -265,12 +270,12 @@ meower.socket.on("create_message", (post) => {
         };
         const fuse = new Fuse(masterTimeZoneList, options);
         const fuseResults = fuse.search(searchValue);
-        let results: string[] = [];
+        const results: string[] = [];
         fuseResults.forEach((element) => {
           results.push(element.item);
         });
         if (results.length == 0) results.push("No timezones found");
-        let replyContent: string = `Search Results for ${searchValue}:\n${
+        const replyContent: string = `Search Results for ${searchValue}:\n${
           results.splice(0, 40).join(", ")
         } \nMax number of results is 30.`;
         post.reply({
@@ -278,14 +283,15 @@ meower.socket.on("create_message", (post) => {
           content: replyContent,
         });
         logCommand(command, post.username);
-      } catch (err) {
+      } catch (error) {
+        console.log("Error: search");
+        console.error(error);
         post.reply({
           reply_to: [post.id],
           content: errorMsg,
         });
-      } finally {
-        break;
       }
+      break;
     }
     case "date":
     case "getdate": {
@@ -328,14 +334,15 @@ meower.socket.on("create_message", (post) => {
           content: replyContent,
         });
         logCommand(command, post.username);
-      } catch (err) {
+      } catch (error) {
+        console.log("Error: date");
+        console.error(error);
         post.reply({
           reply_to: [post.id],
           content: errorMsg,
         });
-      } finally {
-        break;
       }
+      break;
     }
     case "example": {
       try {
@@ -360,20 +367,22 @@ meower.socket.on("create_message", (post) => {
           });
           break;
         }
-        let replyContent = `Examples for: ${exCommand}\n${examples.join(", ")}`;
+        const replyContent = `Examples for: ${exCommand}\n${
+          examples.join(", ")
+        }`;
         post.reply({
           reply_to: [post.id],
           content: replyContent,
         });
       } catch (error) {
-        console.log(error);
+        console.log("Error: example");
+        console.error(error);
         post.reply({
           reply_to: [post.id],
           content: errorMsg,
         });
-      } finally {
-        break;
       }
+      break;
     }
     default:
       post.reply({
