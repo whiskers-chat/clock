@@ -167,7 +167,7 @@ const masterTimeZoneList = createTimeZoneList();
 
 updateQuote(
   meower,
-  "Bot is online!\nRun ```@clock help```, or visit https://whiskers.chat/docs/clockDocs, to see what I can do!\nrun by @Blahaj, if you have any issues, contact support@whiskers.chat",
+  "Bot is online!\nRun ```@clock help```, or visit https://whiskers.chat/docs/clockDocs, to see what I can do!\nrun by @Blahaj, if you have any issues, contact support@whiskers.chat\n> In this US election our civil rights are on the line, if you are eligible, make a plan to vote at https://iwillvote.com/.",
 );
 
 meower.socket.on("create_message", (post) => {
